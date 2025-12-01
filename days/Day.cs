@@ -1,6 +1,6 @@
 using System.Diagnostics;
 
-namespace AdventOfCode2024 {
+namespace AdventOfCode2025 {
     public abstract class Day<T> {
         public void OutputParts() {
             Stopwatch watch = new Stopwatch();

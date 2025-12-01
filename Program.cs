@@ -1,36 +1,15 @@
 ﻿using System.Diagnostics;
 
-namespace AdventOfCode2024 {
+namespace AdventOfCode2025 {
     public class Program {
         private static void Main() {
-            int dayNum = WithinLimit(8);
+            int dayNum = WithinLimit(1);
             dynamic day;
             Stopwatch watch = new Stopwatch();
             watch.Start();
             switch (dayNum) {
                 case 1:
                     day = new Day1();
-                    break;
-                case 2:
-                    day = new Day2();
-                    break;
-                case 3:
-                    day = new Day3();
-                    break;
-                case 4:
-                    day = new Day4();
-                    break;
-                case 5:
-                    day = new Day5();
-                    break;
-                case 6:
-                    day = new Day6();
-                    break;
-                case 7:
-                    day = new Day7();
-                    break;
-                case 8:
-                    day = new Day8();
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(dayNum), "Encountered a day not in the switch statement");
