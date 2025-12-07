@@ -1,5 +1,5 @@
 namespace AdventOfCode2025 {
-    public class Day7 : Day<int> {
+    public class Day7 : Day<long> {
         private string[] map;
         private (int, int) startCoord;
         private char SPLITTER_SYMBOL = '^';
@@ -22,7 +22,7 @@ namespace AdventOfCode2025 {
             }
             return (mapRes, start);
         }
-        public override int Part1() {
+        public override long Part1() {
             // standard BFS approach
             bool[,] visited = new bool[map.Length, map[0].Length];
             Queue<(int, int)> queue = new Queue<(int, int)>();
@@ -38,8 +38,8 @@ namespace AdventOfCode2025 {
 
                 // split if needed
                 if (map[x][y] == SPLITTER_SYMBOL) {
-                    queue.Enqueue((x, y + 1));
-                    queue.Enqueue((x, y - 1));
+                    queue.Enqueue((x + 1, y + 1));
+                    queue.Enqueue((x + 1, y - 1));
 
                     // increment split counter
                     count++;
@@ -51,8 +51,44 @@ namespace AdventOfCode2025 {
             }
             return count;
         }
-        public override int Part2() {
-            return -1;
+        public override long Part2() {
+            // keeps track of how many paths have reached a point, and adds it to the next point
+
+            // standard BFS approach
+            bool[,] visited = new bool[map.Length, map[0].Length];
+            long[,] paths = new long[map.Length, map[0].Length];
+            (int startX, int startY) = startCoord;
+            paths[startX, startY] = 1;
+            Queue<(int, int)> queue = new Queue<(int, int)>();
+            queue.Enqueue(startCoord);
+            while (queue.Count > 0) {
+                // visit current node
+                (int x, int y) = queue.Dequeue();
+                if (x < 0 || x >= map.Length) continue;
+                if (y < 0 || y >= map[x].Length) continue;
+                if (visited[x, y]) continue;
+                visited[x, y] = true;
+
+                // split if needed
+                if (map[x][y] == SPLITTER_SYMBOL) {
+                    queue.Enqueue((x + 1, y + 1));
+                    if (x + 1 < map.Length && y + 1 < map[x].Length) paths[x + 1, y + 1] += paths[x, y];
+                    queue.Enqueue((x + 1, y - 1));
+                    if (x + 1 < map.Length && y - 1 >= 0) paths[x + 1, y - 1] += paths[x, y];
+
+                // traverse normally
+                } else {
+                    queue.Enqueue((x + 1, y));
+                    if (x + 1 < map.Length) paths[x + 1, y] += paths[x, y];
+                }
+            }
+
+            // calculate sum of paths that reached final row
+            long count = 0;
+            for (int i = 0; i < map[^1].Length; i++) {
+                count += paths[map.Length - 1, i];
+            }
+            return count;
         }
     }
 }
