@@ -1,5 +1,3 @@
-using System.Security.Cryptography;
-
 namespace AdventOfCode2025 {
     public class Day8 : Day<int> {
         private int[][] coords;
@@ -23,37 +21,46 @@ namespace AdventOfCode2025 {
             int ITERATIONS = 1000;
             int TOP_AMOUNT = 3;
 
+            // set up order of traversal
+            (int, int)[] values = new (int, int)[coords.Length * coords.Length];
+            for (int i = 0; i < coords.Length; i++) {
+                for (int j = 0; j < coords.Length; j++) {
+                    values[coords.Length * i + j] = (i, j);
+                }
+            }
+
+            // sort values based on Euclidean Algorithm
+            Array.Sort(values, (e1, e2) => {
+                (int first1, int second1) = e1;
+                (int first2, int second2) = e2;
+                return EuclideanDistance(coords[first1], coords[second1]).CompareTo(EuclideanDistance(coords[first2], coords[second2]));
+            });
+
             // set up initial circuits
             HashSet<int>[] circuits = new HashSet<int>[coords.Length];
             for (int i = 0; i < circuits.Length; i++) {
                 circuits[i] = new HashSet<int>{i};
             }
 
-            bool[,] tried = new bool[coords.Length, coords.Length];
-            for (int _ = 0; _ < ITERATIONS; _++) {
-                // find smallest euclidean distance
-                (int, int) min = (0, 0);
-                double dist = Int32.MaxValue;
-                for (int i = 0; i < coords.Length; i++) {
-                    for (int j = i + 1; j < coords.Length; j++) {
-                        if (tried[i, j]) continue;
-                        double curr = EuclideanDistance(coords[i], coords[j]);
-                        if (curr < dist) {
-                            min = (i, j);
-                            dist = curr;
-                        }
-                    }
+            // go through with a visited array
+            bool[,] occupied = new bool[coords.Length, coords.Length];
+            for (int i = 0; i < ITERATIONS && i < values.Length; i++) {
+                // get smallest unvisited euclidean distance
+                (int first, int second) = values[i];
+                if (first == second || occupied[first, second] || occupied[second, first]) {
+                    ITERATIONS++;
+                    continue;
                 }
 
-                // visit them
-                (int first, int second) = min;
-                tried[first, second] = true;
-                tried[second, first] = true;
+                // visit it
+                occupied[first, second] = true;
+                occupied[second, first] = true;
+                if (circuits[first].Contains(second)) continue;
 
                 // merge them
                 circuits[first].UnionWith(circuits[second]);
-                foreach (int i in circuits[second]) {
-                    circuits[i] = circuits[first];
+                foreach (int box in circuits[second]) {
+                    circuits[box] = circuits[first];
                 }
             }
             
